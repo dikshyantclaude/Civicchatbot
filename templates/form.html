@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head><meta name="csrf-token" content="{{ csrf_token }}">
+<script src="{{ url_for('static', filename='common.js') }}"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>घर-बहाल सम्झौता पत्र जेनेरेटर</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Devanagari', 'Kalimati', Arial, sans-serif;
+            background: linear-gradient(135deg, #2093df 0%, #2093df 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #153b60 0%, #153b60 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.1); opacity: 0.2; }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            display: flex;
+            min-height: 80vh;
+        }
+
+        .form-panel {
+            flex: 1;
+            padding: 40px;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e6ed;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        .preview-panel {
+            flex: 1;
+            padding: 40px;
+            background: white;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #34495e;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        /* Document Preview Styles */
+        .document-preview {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-family: 'Noto Sans Devanagari', 'Kalimati', Arial, sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+        }
+
+        .document-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-decoration: underline;
+            color: #2c3e50;
+        }
+
+        .document-content {
+            text-align: justify;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .document-section {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .signature-section {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+        }
+
+        .signature-block {
+            text-align: left;
+        }
+
+        .signature-block h4 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #000;
+            height: 60px;
+            margin-bottom: 5px;
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .header,
+            .form-panel,
+            .print-btn {
+                display: none;
+            }
+            
+            .main-content {
+                display: block;
+            }
+            
+            .preview-panel {
+                padding: 20px;
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .form-panel,
+            .preview-panel {
+                flex: none;
+                max-height: none;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body><p style="padding:12px;background:#fff3cd;color:#222">Document draft only. Review the wording and legal requirements before using or signing it. <a href="/">Home</a></p>
+    <div class="container">
+        <div class="header">
+            <h1>घर-बहाल सम्झौता पत्र जेनेरेटर</h1>
+            <p>व्यावसायिक भाडा सम्झौता फारम र डकुमेन्ट जेनेरेटर</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Form Panel -->
+            <div class="form-panel">
+                <form id="rentalForm">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h3 class="section-title">आधारभूत जानकारी</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="district">जिल्ला <span class="required">*</span></label>
+                                <input type="text" id="district" name="district" required placeholder="जिल्लाको नाम">
+                            </div>
+                            <div class="form-group">
+                                <label for="ward">वडा नम्बर <span class="required">*</span></label>
+                                <input type="text" id="ward" name="ward" required placeholder="वडा नम्बर">
+                            </div>
+                            <div class="form-group">
+                                <label for="agreementDate">सम्झौता मिति <span class="required">*</span></label>
+                                <input type="date" id="agreementDate" name="agreementDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nepaliDate">नेपाली मिति</label>
+                                <input type="text" id="nepaliDate" name="nepaliDate" placeholder="२०८१ साल माग ०७ गते">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Landlord Information -->
+                    <div class="form-section">
+                        <h3 class="section-title">घरधनी (प्रथम पक्ष) को विवरण</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="landlordName">पूरा नाम <span class="required">*</span></label>
+                                <input type="text" id="landlordName" name="landlordName" required placeholder="घरधनीको पूरा नाम">
+                            </div>
+                            <div class="form-group">
+                                <label for="landlordFatherName">बुबाको नाम <span class="required">*</span></label>
+                                <input type="text" id="landlordFatherName" name="landlordFatherName" required placeholder="बुबाको नाम">
+                            </div>
+                            <div class="form-group">
+                                <label for="landlordAge">उमेर <span class="required">*</span></label>
+                                <input type="number" id="landlordAge" name="landlordAge" required placeholder="उमेर">
+                            </div>
+                            <div class="form-group">
+                                <label for="landlordAddress">ठेगाना <span class="required">*</span></label>
+                                <input type="text" id="landlordAddress" name="landlordAddress" required placeholder="पूरा ठेगाना">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tenant Information -->
+                    <div class="form-section">
+                        <h3 class="section-title">भाडावाल (दोस्रो पक्ष) को विवरण</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="tenantName">पूरा नाम <span class="required">*</span></label>
+                                <input type="text" id="tenantName" name="tenantName" required placeholder="भाडावालको पूरा नाम">
+                            </div>
+                            <div class="form-group">
+                                <label for="tenantFatherName">बुबाको नाम <span class="required">*</span></label>
+                                <input type="text" id="tenantFatherName" name="tenantFatherName" required placeholder="बुबाको नाम">
+                            </div>
+                            <div class="form-group">
+                                <label for="tenantAge">उमेर <span class="required">*</span></label>
+                                <input type="number" id="tenantAge" name="tenantAge" required placeholder="उमेर">
+                            </div>
+                            <div class="form-group">
+                                <label for="tenantAddress">ठेगाना <span class="required">*</span></label>
+                                <input type="text" id="tenantAddress" name="tenantAddress" required placeholder="पूरा ठेगाना">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Property Details -->
+                    <div class="form-section">
+                        <h3 class="section-title">घरको विवरण</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="propertyLocation">घरको स्थान <span class="required">*</span></label>
+                                <input type="text" id="propertyLocation" name="propertyLocation" required placeholder="घरको पूरा ठेगाना">
+                            </div>
+                            <div class="form-group">
+                                <label for="propertyDescription">घरको विवरण</label>
+                                <textarea id="propertyDescription" name="propertyDescription" placeholder="घरको विवरण (उदाहरण: दोस्रो तल्लाको एउटा कोठा)"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rental Terms -->
+                    <div class="form-section">
+                        <h3 class="section-title">भाडा सम्बन्धी शर्तहरू</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="monthlyRent">मासिक भाडा (रुपैयाँ) <span class="required">*</span></label>
+                                <input type="number" id="monthlyRent" name="monthlyRent" required placeholder="५०००">
+                            </div>
+                            <div class="form-group">
+                                <label for="rentDueDate">भाडा तिर्ने मिति <span class="required">*</span></label>
+                                <input type="text" id="rentDueDate" name="rentDueDate" required placeholder="मासिकको ५ गते">
+                            </div>
+                            <div class="form-group">
+                                <label for="rentIncrease">वार्षिक वृद्धि दर (%)</label>
+                                <input type="number" id="rentIncrease" name="rentIncrease" placeholder="५" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="agreementDuration">सम्झौता अवधि</label>
+                                <input type="text" id="agreementDuration" name="agreementDuration" placeholder="२०८१ साल माग ०७ गते">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Terms -->
+                    <div class="form-section">
+                        <h3 class="section-title">अतिरिक्त शर्तहरू</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="electricityBill">बिजुलीको बिल</label>
+                                <select id="electricityBill" name="electricityBill">
+                                    <option value="">छान्नुहोस्</option>
+                                    <option value="घरधनी">घरधनीले तिर्ने</option>
+                                    <option value="भाडावाल">भाडावालले तिर्ने</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="waterBill">पानीको बिल</label>
+                                <select id="waterBill" name="waterBill">
+                                    <option value="">छान्नुहोस्</option>
+                                    <option value="घरधनी">घरधनीले तिर्ने</option>
+                                    <option value="भाडावाल">भाडावालले तिर्ने</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="maintenanceResponsibility">मर्मत सम्भारको जिम्मेवारी</label>
+                                <textarea id="maintenanceResponsibility" name="maintenanceResponsibility" placeholder="मर्मत सम्भारको जिम्मेवारी को हुनेछ"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="additionalTerms">अन्य शर्तहरू</label>
+                                <textarea id="additionalTerms" name="additionalTerms" placeholder="अन्य कुनै शर्तहरू"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">रिसेट</button>
+                        <button type="button" class="btn btn-primary" onclick="generateDocument()">डकुमेन्ट बनाउनुहोस्</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="preview-panel">
+                <div class="document-preview">
+                    <div id="documentContent">
+                        <div style="text-align: center; color: #666; font-size: 1.2rem; margin-top: 50px;">
+                            <p>📄 कृपया फारम भर्नुहोस्</p>
+                            <p>डकुमेन्ट यहाँ देखिनेछ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-success print-btn" onclick="printDocument()" style="display: none;">
+        🖨️ प्रिन्ट गर्नुहोस्
+    </button>
+
+    <script>
+        function generateDocument() {
+            const form = document.getElementById('rentalForm');
+            const formData = new FormData(form);
+            
+            // Validate required fields
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.style.borderColor = '#e74c3c';
+                } else {
+                    field.style.borderColor = '#e0e6ed';
+                }
+            });
+            
+            if (!isValid) {
+                alert('कृपया सबै आवश्यक फिल्डहरू भर्नुहोस्।');
+                return;
+            }
+
+            // Get form values
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = escapeHTML(value);
+            }
+
+            // Generate document content
+            const documentHTML = `
+                <div class="document-title">घर-बहाल सम्झौता पत्र</div>
+                
+                <div class="document-content">
+                    <strong>${data.district}</strong> जिल्ला कं.म.न.पा. वडा <strong>${data.ward}</strong> वर्षे घरधनी भएको <strong>${data.landlordName}</strong> s/o <strong>${data.landlordFatherName}</strong> उमेर <strong>${data.landlordAge}</strong> वर्ष ठेगाना <strong>${data.landlordAddress}</strong> (यसपछि प्रथम पक्ष भनिने) र बीन निम्न शर्तहरूको पालना गर्ने गरी गरे कोठा भाडामा लिन दिने मन्जुरी गएप अनुसार हामी दुवै श्रीले गरेको सम्झौता पत्र बुझी लिनी दिनी।
+                </div>
+
+                <div class="document-section">
+                    <strong>१. बहालमा दिने/लिने घरको विवरण :</strong> ${data.district} जिल्ला कं.म.न.पा वडा ${data.ward} मा प्रथम पक्षको नाम रहेको तल्ले घरको दोस्रो तल्लाको एउटा कोठा।
+                </div>
+
+                <div class="document-section">
+                    <strong>२. भाडा:</strong> उक्त कोठाको मासिक भाडा रु. <strong>${data.monthlyRent}</strong> हुनेछ र दोस्रो पक्षले एक महिनाको मासिक भाडा प्रत्येक महिनाको <strong>${data.rentDueDate}</strong> मा वुझाउनुपर्ने छ। प्राकृतिक रूपमा उक्त भाडा र स्थानीय हासलको भन्दा कम नहुने वा बार्षिक ${data.rentIncrease || '५'}% ले बढी हुनेछ।
+                </div>
+
+                <div class="document-section">
+                    <strong>३. अवधि:</strong> यो सम्झौता पत्रको अवधि <strong>${data.agreementDuration || '२०८१ साल माग ०७ गते'}</strong> देखि ${data.agreementDuration ? 'सम्म' : 'देखि'} रहनेछ। दुवै श्रीको मन्जुरीमा यो अवधि भमध्ये गर्न सकिनेछ।
+                </div>
+
+                <div class="document-section">
+                    <strong>४. दोस्रो पक्षले कोठा छोड्ने भए कम्तिमा ३ महिना अगावै लिखित रूपमा कारण खुलाई प्रथम पक्षलाई सूचना दिनु पर्ने छ। सम्झौता पालना नगरेको, गैरकानूनी क्रियाकलाप गरेको प्रमाण प्राप्त भएको तथा भाडामा लिएको सम्पत्तिमा क्षति पुर्याएको वार्षिक अन्य कारणहरू देखाई प्रथमपक्षले दोस्रोपक्षलाई सम्झौता अवधि मिच्न वा खाली गर्न भन्न सक्छ।
+                </div>
+
+                <div class="document-section">
+                    <strong>५. यदि घर बहालमा रहेको बेला दोस्रो पक्षले घरमा कुनै किसिमको भौतिक क्षति पुर्याएमा प्रथम पक्षले उक्त जम्मा पुजी वाट त्यसको भर्पाई लिएर वार्कि रकम फिर्ता गर्ने छ। प्राकृतिक रूपमा उक्त भाडा र स्थानीय हासलको भन्दा कम नहुने वा बार्षिक ${data.rentIncrease || '५'}% ले बढी हुनेछ।
+                </div>
+
+                <div class="document-section">
+                    <strong>६. कोठा भाडा वापत लागे अग्रिम आयकर दोस्रोपक्षले सम्बन्धित निकायमा वुझाउछ छ।</strong>
+                </div>
+
+                <div class="document-section">
+                    <strong>७. कोठामा जडान भएको धारा, विद्युत र टेलिफोनमा लागे महसुल दोस्रो पक्षले बुझाउने छ।</strong>
+                </div>
+
+                <div class="document-section">
+                    <strong>८. यसमा उल्लेख नभएका कुराहरूको हकमा दुवै पक्षको सहमति अनुसार तय गरिनेछ।</strong>
+                </div>
+
+                <div class="document-section">
+                    इति सम्वत् <strong>${data.nepaliDate || '२०८१ साल माग ०७ गते'}</strong> रोज।
+                </div>
+
+                <div class="signature-section">
+                    <div class="signature-block">
+                        <strong>घरधनीका तर्फ व्यक्ति दस्तखत</strong><br>
+                        <strong>नाम :</strong> ${data.landlordName}<br>
+                        <strong>पद:</strong> संचालक<br>
+                        <strong>संख्या/कार्यालय :</strong><br>
+                        <strong>संस्थाको छाप:</strong><br>
+                        <div class="signature-line"></div>
+                    </div>
+                    <div class="signature-block">
+                        <strong>घरधनीको दस्तखत</strong><br>
+                        <strong>नाम :</strong> ${data.tenantName}<br><br><br><br>
+                        <div class="signature-line"></div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('documentContent').innerHTML = documentHTML;
+            document.querySelector('.print-btn').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('rentalForm').reset();
+            document.getElementById('documentContent').innerHTML = `
+                <div style="text-align: center; color: #666; font-size: 1.2rem; margin-top: 50px;">
+                    <p>📄 कृपया फारम भर्नुहोस्</p>
+                    <p>डकुमेन्ट यहाँ देखिनेछ</p>
+                </div>
+            `;
+            document.querySelector('.print-btn').style.display = 'none';
+        }
+
+        function printDocument() {
+            window.print();
+        }
+
+        // Auto-generate document on form changes
+        document.getElementById('rentalForm').addEventListener('input', function() {
+            // Optional: Auto-generate on input change
+            // generateDocument();
+        });
+    </script>
+</body>
+</html>
