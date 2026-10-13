@@ -20,3 +20,6 @@ tiktoken>=0.5.2
 # Document Processing & Utilities
 pypdf>=3.17.0
 python-dotenv>=1.0.0
+
+langchain-huggingface
+sentence-transformers
