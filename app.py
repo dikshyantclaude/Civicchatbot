@@ -19,10 +19,12 @@ from langchain_openai import ChatOpenAI
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone
-from langchain.prompts import ChatPromptTemplate
-from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory
-from langchain.schema import HumanMessage, AIMessage
+from langchain_core.prompts import ChatPromptTemplate
 
+
+# Updated / Correct:
+from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory
+from langchain_core.messages import HumanMessage, AIMessage
 # Initialize Flask app
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=template_dir)
