@@ -21,6 +21,9 @@ tiktoken>=0.5.2
 pypdf>=3.17.0
 python-dotenv>=1.0.0
 
+pinecone>=6,<8
+sentence-transformers>=3,<6
+
 langchain-huggingface
 sentence-transformers
 langchain_pinecone
